@@ -26,7 +26,7 @@ A set of libraries, inspired by other functional programming communities, in a k
 
 - core - typed error handling
 - arrow-fx - working with coroutines
-- arrow-resilience
+- arrow-resilience - resilience patterns
 - arrow-optics - working with deep immutable types
 
 ---
@@ -80,7 +80,7 @@ suspend fun DogCeoApi.naiveApproach(
 
 ## Problem
 
-It's extremely slow
+It's extremely slow because it's sequential
 
 - Duration: 20.929836273s
 - Duration: 19.802737721s
@@ -144,7 +144,7 @@ suspend fun DogCeoApi.arrowFx(
 
 - Works the same as the previous example
 - Internally built the same way
-- Single function change to go from sequential to parallel
+- Single function change to go from sequential to concurrent
 - Less error prone
 
 ---
@@ -195,29 +195,69 @@ suspend fun DogCeoApi.arrowFxTwo(
 
 ## Limiting concurrency
 
+```kotlin
+suspend fun DogCeoApi.parallelFour(
+): List<Pair<String, HttpUrl>> {
+    val semaphore = Semaphore(10)
+    return coroutineScope {
+        breedNames()
+            .map { async { semaphore.withPermit { imageUrl(it) } } }
+            .awaitAll()
+    }
+}
+```
+
+---
+
+## Limiting concurrency
+
 ```
 suspend fun DogCeoApi.arrowFxThree(
 ): List<Pair<String, HttpUrl>> =
     breedNames().parMap(concurrency = 12) { imageUrl(it) }
 ```
 
+Uses a semaphore internally
+
 ----
 
 ## Independent computations - motivation
 
-- Get all images for a breed
+- Get a random image for a breed
 - Get a fun fact about a breed
+
+```kotlin
+
+```
+// Pair of breed name and random image URL
+suspend fun DogCeoApi.imageUrl(
+    name: String
+): Pair<String, HttpUrl> = TODO()
+
+suspend fun DogCeoApi.funFact(): String = TODO()
+---
+
+## Independent computations
+
+```kotlin
+suspend fun DogCeoApi.execute(breedName: String): Pair<HttpUrl, String> =
+    coroutineScope {
+        val imageUrlD = async { imageUrl(breedName) }
+        val funFactD = async { funFact(breedName) }
+        imageUrlD.await() to funFactD.await()
+    }
+```
 
 ---
 
 ## Independent computations
 
 ```kotlin
-suspend fun execute(breedName: String): Pair<String, String> =
+suspend fun execute(breedName: String): Pair<HttpUrl, String> =
     parZip(
-        { breedImages(breedName) },
+        { imageUrl(breedName) },
         { breedFunFact(breedName) }
-    ) { image, funFact -> image to funFact }
+    ) { imageUrl, funFact -> imageUrl to funFact }
 ```
 
 ---
@@ -251,17 +291,17 @@ suspend fun breedNames(): List<String> {
 ```
 
 - Always paying the price (duration) of `cachedBreeds()`
-- Doing it in parallel leads to waste
+- Doing it in concurrently leads to waste
 
 ---
 
 ## Racing
 
 ```kotlin
-suspend fun execute(breedName: String): String =
+suspend fun execute(): List<String> =
     raceN(
-        { breedImageFromCache(breedName) },
-        { breedImageFromApi(breedName) }
+        { cachedBreeds() }, // does NOT complete on empty cache
+        { remoteBreeds() }
     ).merge()
 ```
 
@@ -388,3 +428,13 @@ suspend fun DogCeoApi.arrowFxFour(): List<Pair<String, HttpUrl>> =
 - independent computations
 - racing
 - resilience with Schedule
+
+---
+
+## The End
+
+Thank you for your attention
+
+@s_anastasov
+
+![slides](images/slides.png) <!-- .element width="20%" -->
