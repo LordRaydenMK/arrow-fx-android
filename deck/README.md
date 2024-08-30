@@ -20,6 +20,17 @@
 
 ----
 
+## What is Arrow
+
+A set of libraries, inspired by other functional programming communities, in a kotlin friendly way.
+
+- core - typed error handling
+- arrow-fx - working with coroutines
+- arrow-resilience
+- arrow-optics - working with deep immutable types
+
+---
+
 ### Dog CEO App
 
 ![Dogs List screenshot](images/list.png) <!-- .class="r-stretch" -->
@@ -38,7 +49,7 @@ Display a list of dog breeds with a random image for each breed.
 
 ![API GET Random Image](images/api2.png)_<!-- .class="r-stretch" -->
 
----
+----
 
 ## Kotlin API
 
@@ -190,7 +201,7 @@ suspend fun DogCeoApi.arrowFxThree(
     breedNames().parMap(concurrency = 12) { imageUrl(it) }
 ```
 
----
+----
 
 ## Independent computations - motivation
 
@@ -208,6 +219,14 @@ suspend fun execute(breedName: String): Pair<String, String> =
         { breedFunFact(breedName) }
     ) { image, funFact -> image to funFact }
 ```
+
+---
+
+## Characteristics
+
+- Executes the functions concurrently
+- Executes the lambda if all succeed
+- Failure in one action cancels the other actions
 
 ---
 
@@ -246,7 +265,8 @@ suspend fun execute(breedName: String): String =
     ).merge()
 ```
 
-- The looser gets canceled, conserving resources
+- Executes the actions concurrently
+- Cancels the looser, conserving resources
 
 ---
 
@@ -267,8 +287,8 @@ The `Schedule` type allows you to define and compose powerful yet simple policie
 
 ## Built-in policies
 
-- `Schedule.recurs(10)` - a policy that retries up to 10 times
-- `Schedule.spaced<A>(60.seconds)` - a policy that retries forever with 60 seconds break
+- `Schedule.recurs(10)` - a policy that runs up to 10 times
+- `Schedule.spaced<A>(60.seconds)` - a policy that runs forever with 60 seconds break
 - `Schedule.exponential<A>(10.milliseconds)` - Exponential backing off schedule
 - `Schedule.fibonacci`
 - `Schedule.linear`
@@ -326,7 +346,7 @@ Schedule.exponential<A>(10.milliseconds)
 ## Retrying actions
 
 ```kotlin
-val schedule = Schedule.spaced<A>(60.seconds) and Schedule.recurs(100)
+val schedule = Schedule.spaced<Throwable>(60.seconds) and Schedule.recurs(100)
 
 schedule.retry {
     breedImages(breedName)
@@ -338,14 +358,14 @@ schedule.retry {
 ## Repeating actions
 
 ```kotlin
-val schedule = Schedule.spaced<A>(60.seconds) and Schedule.recurs(100)
+val schedule = Schedule.spaced<Throwable>(60.seconds) and Schedule.recurs(100)
 
 schedule.repeat {
     breedImages(breedName)
 }
 ```
 
----
+----
 
 ## Putting it all together
 
@@ -353,9 +373,7 @@ schedule.repeat {
 suspend fun DogCeoApi.arrowFxFour(): List<Pair<String, HttpUrl>> =
     breedNames().parMapNotNull {
         try {
-            schedule<Throwable>().retry { 
-                imageUrl(it)
-            }
+            schedule.retry { imageUrl(it) }
         } catch (e: IOException) {
             null
         }
