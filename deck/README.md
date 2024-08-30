@@ -20,17 +20,6 @@
 
 ----
 
-## What is Arrow
-
-A set of libraries, inspired by other functional programming communities, in a kotlin friendly way.
-
-- core - typed error handling
-- arrow-fx - working with coroutines
-- arrow-resilience - resilience patterns
-- arrow-optics - working with deep immutable types
-
----
-
 ### Dog CEO App
 
 ![Dogs List screenshot](images/list.png) <!-- .class="r-stretch" -->
@@ -134,6 +123,17 @@ suspend fun DogCeoApi.parallelTwo(
 
 ---
 
+## What is Arrow
+
+A set of libraries, inspired by other functional programming communities, in a kotlin friendly way.
+
+- core - typed error handling
+- arrow-fx - working with coroutines
+- arrow-resilience - resilience patterns
+- arrow-optics - working with deep immutable types
+
+---
+
 ## Arrow FX
 
 ```kotlin
@@ -227,21 +227,22 @@ Uses a semaphore internally
 - Get a fun fact about a breed
 
 ```kotlin
-
-```
 // Pair of breed name and random image URL
 suspend fun DogCeoApi.imageUrl(
     name: String
 ): Pair<String, HttpUrl> = TODO()
 
 suspend fun DogCeoApi.funFact(): String = TODO()
+```
+
 ---
 
 ## Independent computations
 
 ```kotlin
-suspend fun DogCeoApi.execute(breedName: String): Pair<HttpUrl, String> =
-    coroutineScope {
+suspend fun DogCeoApi.execute(
+    breedName: String
+): Pair<HttpUrl, String> = coroutineScope {
         val imageUrlD = async { imageUrl(breedName) }
         val funFactD = async { funFact(breedName) }
         imageUrlD.await() to funFactD.await()
@@ -405,7 +406,15 @@ schedule.repeat {
 }
 ```
 
-----
+---
+
+## ZIO Schedule
+
+Port of ZIO Schedule from Scala
+
+![ZIO Schedule](images/zio_schedule.png)
+
+---
 
 ## Putting it all together
 
@@ -420,13 +429,13 @@ suspend fun DogCeoApi.arrowFxFour(): List<Pair<String, HttpUrl>> =
     }
 ```
 
----
+----
 
 ## Conclusion
 
-- working with lists
-- independent computations
-- racing
+- working with lists -> `parMap`
+- independent computations -> `parZip`
+- racing -> `raceN`
 - resilience with Schedule
 
 ---
