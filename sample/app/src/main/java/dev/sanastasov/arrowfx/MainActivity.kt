@@ -14,10 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dev.sanastasov.arrowfx.dogceo.arrowFx
-import dev.sanastasov.arrowfx.dogceo.arrowFxThree
-import dev.sanastasov.arrowfx.dogceo.naiveApproach
-import dev.sanastasov.arrowfx.dogceo.parallelOne
-import dev.sanastasov.arrowfx.dogceo.parallelTwo
 import dev.sanastasov.arrowfx.list.DogListViewModel
 import dev.sanastasov.arrowfx.list.DogsListScreen
 import dev.sanastasov.arrowfx.ui.theme.ArrowFxTheme
@@ -31,7 +27,7 @@ class MainActivity : ComponentActivity() {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val api = (application as App).dogCeoApi
-                val vm = DogListViewModel(api) { arrowFxThree() }
+                val vm = DogListViewModel(api) { arrowFx() }
                 return vm as T
             }
         }
