@@ -9,6 +9,6 @@ interface DogCeoApi {
     @GET("breeds/list/all")
     suspend fun allBreedNames(): JsonObject
 
-    @GET("breed/{breed}/images")
+    @GET("breed/{breed}/images/random")
     suspend fun imagesByBreed(@Path("breed")  name: String): JsonObject
 }
