@@ -12,7 +12,7 @@ npm start
 
 ## Presented at
 
-- [Droidcon Lisbon 2024][dclx24]
+- [Droidcon Lisbon 2024][dclx24] - [Video on YouTube][video]
 
 ## Abstract
 
@@ -23,3 +23,4 @@ Arrow-Fx expands on the capabilities of the Kotlinx coroutines library with addi
 By the end of this talk, attendees will discover how the Arrow-Fx library can drastically simplify the development process, allowing them to create powerful and efficient Android applications with minimal effort.
 
 [dclx24]: https://www.lisbon.droidcon.com/
+[video]: https://www.youtube.com/watch?v=6bBhdTuBVpw
